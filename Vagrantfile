@@ -1,77 +1,49 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
 Vagrant.configure("2") do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "/ubuntu/jammy64"
+  # Imagen base para todas las máquinas (Ubuntu 22.04 LTS)
+  config.vm.box = "ubuntu/jammy64"
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
+  # ==========================================
+  # 1. SERVIDOR DHCP (dhcp)
+  # ==========================================
+  config.vm.define "dhcp" do |srv|
+    srv.vm.hostname = "dhcp"
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+    # Adaptador 1: Red pública (Bridge con la red de tu host/casa/aula)
+    srv.vm.network "public_network", bridge: "enp3s0"
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine and only allow access
-  # via 127.0.0.1 to disable public access
-  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+    # Adaptador 2: Red interna 'intnet' con IP fija 192.168.57.10[cite: 2, 3]
+    srv.vm.network "private_network",
+      ip: "192.168.57.10",
+      virtualbox__intnet: "intnet"
+  end
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+  # ==========================================
+  # 2. CLIENTE 1 (c1)
+  # ==========================================
+  config.vm.define "c1" do |c1|
+    c1.vm.hostname = "c1"
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+    # Conectado a la red interna 'intnet' configurado por DHCP[cite: 2, 5]
+    c1.vm.network "private_network",
+      type: "dhcp",
+      virtualbox__intnet: "intnet"
+  end
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+  # ==========================================
+  # 3. IMPRESORA (printer)
+  # ==========================================
+  config.vm.define "printer" do |printer|
+    printer.vm.hostname = "printer"
 
-  # Disable the default share of the current code directory. Doing this
-  # provides improved isolation between the vagrant box and your host
-  # by making sure your Vagrantfile isn't accessible to the vagrant box.
-  # If you use this you may want to enable additional shared subfolders as
-  # shown above.
-  # config.vm.synced_folder ".", "/vagrant", disabled: true
+    # Conectado a 'intnet' con una dirección MAC fija para asignación estática por DHCP[cite: 2, 7]
+    printer.vm.network "private_network",
+      :mac => "080027112233",
+      type: "dhcp",
+      virtualbox__intnet: "intnet"
+  end
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
-
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
 end
