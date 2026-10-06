@@ -31,5 +31,4 @@ Vagrant.configure("2") do |config|
       type: "dhcp",
       virtualbox__intnet: "intnet"
   end
-
 end
