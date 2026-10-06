@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "linux"
+  config.vm.box = "debian/bookworm"
 
   config.vm.define "dhcp" do |srv|
     srv.vm.hostname = "dhcp"
