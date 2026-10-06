@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
     printer.vm.hostname = "printer"
 
     printer.vm.network "private_network",
-      :mac => "080027112233",
+      :mac => "9c:6b:00:0b:ef:bc",
       type: "dhcp",
       virtualbox__intnet: "intnet"
   end
